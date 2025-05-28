@@ -1,45 +1,72 @@
 from colorama import Fore, Style
 
-def get_currency_input(prompt):
+def get_currency_input(prompt: str) -> float:
+    """Get and validate currency input from user.
+    
+    Args:
+        prompt: Message to display when asking for input
+        
+    Returns:
+        Validated float number
+        
+    Example:
+        >>> amount = get_currency_input("Enter amount: $")
+        Enter amount: $50.25
+        >>> print(amount)
+        50.25
+    """
     while True:
         try:
             value = input(Fore.YELLOW + prompt + Style.RESET_ALL).strip()
-            if value.startswith("$"):
-                value = value[1:]
-            return float(value)
+            value = value.replace('$', '').replace(',', '')
+            num = float(value)
+            
+            if num == 0:
+                print(f"{Fore.RED}Amount can't be zero{Style.RESET_ALL}")
+                continue
+                
+            return num
         except ValueError:
-            print(f"{Fore.RED}Invalid amount. Please enter numbers (e.g. 50 or -20.50){Style.RESET_ALL}")
+            print(f"{Fore.RED}Invalid amount. Please enter like 50 or -20.50{Style.RESET_ALL}")
 
-def print_table(headers, rows):
+def print_table(headers: list, rows: list) -> None:
+    """Print formatted table with headers and rows.
+    
+    Args:
+        headers: List of column headers
+        rows: List of lists containing row data
+        
+    Example:
+        >>> headers = ["Name", "Age"]
+        >>> rows = [["Alice", 30], ["Bob", 25]]
+        >>> print_table(headers, rows)
+    """
     if not rows or not headers:
         print(f"{Fore.RED}No data to display{Style.RESET_ALL}")
         return
 
-    col_widths = []
-    for i in range(len(headers)):
-        max_len = len(headers[i])
-        for row in rows:
-            if i < len(row):
-                max_len = max(max_len, len(str(row[i])))
-        col_widths.append(max_len)
+    # Calculate column widths
+    col_widths = [
+        max(len(str(row[i])) if i < len(row) else 0 for row in [headers] + rows)
+        for i in range(len(headers))
+    ]
+
+    # Build header
+    header_parts = []
+    for header, width in zip(headers, col_widths):
+        header_parts.append(f"{Fore.CYAN}{header:<{width}}{Style.RESET_ALL}")
     
-    header_row = " | ".join(
-        f"{Fore.CYAN}{header:<{width}}{Style.RESET_ALL}"
-        for header, width in zip(headers, col_widths)
-    )
+    separator = "-+-".join('-' * width for width in col_widths)
     
-    separator = "-" * (sum(col_widths) + 3 * (len(headers) - 1))
-    
+    # Print table
     print(f"\n{separator}")
-    print(header_row)
+    print(" | ".join(header_parts))
     print(separator)
     
     for row in rows:
-        row_data = list(row) + [""] * (len(headers) - len(row))
-        print(" | ".join(
-            f"{str(item):<{width}}"
-            for item, width in zip(row_data[:len(headers)], col_widths)
-        ))
+        row_str = []
+        for i, item in enumerate(row[:len(headers)]):
+            row_str.append(f"{str(item):<{col_widths[i]}}")
+        print(" | ".join(row_str))
     
-    print(separator)
-    print(f"{Fore.BLUE}End of table{Style.RESET_ALL}\n")
+    print(f"{separator}\n")
