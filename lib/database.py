@@ -1,51 +1,34 @@
 import sqlite3
 import os
 
-DATABASE_PATH = "data/finance_tracker.db"
-def get_database_connection():
-     os.makedirs(os.path.dirname(DATABASE_PATH), exist_ok=True)
-     connection = sqlite3.connect(DATABASE_PATH)
-     connection.execute("PRAGMA foreign_keys = ON")
-     connection.row_factory = sqlite3.Row
-     return connection
+def setup_database():
+    os.makedirs('database', exist_ok=True)
+    conn = sqlite3.connect('database/finance_tracker.db')
+    cursor = conn.cursor()
 
-def initialize_transactions_table():
-     connection = get_database_connection()
-     cursor = connection.cursor()
-
-     cursor.execute('''
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS transactions (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            transaction_id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL,
-            amount REAL NOT NULL,
-            category TEXT NOT NULL,
-            date TEXT NOT NULL,
+            amount DECIMAL(10, 2) NOT NULL,
+            category VARCHAR(50) NOT NULL,
+            date DATE NOT NULL,
             description TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            
+            CHECK (amount != 0),
+            CHECK (user_id > 0),
+            CHECK (category != '')
         )
-    ''')
-     
+    """)
 
-     cursor.execute('''
-        CREATE INDEX IF NOT EXISTS idx_transactions_user_id 
-        ON transactions(user_id)
-    ''')
-    
-     cursor.execute('''
-        CREATE INDEX IF NOT EXISTS idx_transactions_date 
-        ON transactions(date)
-    ''')
-    
-     connection.commit()
-     connection.close()
-    
-     print("Transactions table initialized successfully!")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_user_date ON transactions(user_id, date)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_user_category ON transactions(user_id, category)")
 
-if __name__ == "__main__":
-    initialize_transactions_table()
+    conn.commit()
+    conn.close()
 
-
-
-
-
-
+def get_db_connection():
+    conn = sqlite3.connect('database/finance_tracker.db')
+    conn.row_factory = sqlite3.Row
+    return conn
