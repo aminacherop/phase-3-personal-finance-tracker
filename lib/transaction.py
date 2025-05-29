@@ -4,18 +4,33 @@ from .database import get_db_connection
 def save_transaction(user_id, amount, category, date_input, description=''):
     try:
         if user_id <= 0:
-            return False
+            print("Error:Invalid user id")
+            #return False
         if amount == 0:
-            return False
+            print("Error: Amount cannot be zero")
+            #return False
         if not category.strip():
-            return False
+            print("Error: Category cannot be empty")
+            #return False
+
+        # if isinstance(date_input, str):
+        #     transaction_date = datetime.strptime(date_input, '%Y-%m-%d').date()
+        # elif isinstance(date_input, date):
+        #     transaction_date = date_input
+        # else:
+        #     return False
 
         if isinstance(date_input, str):
-            transaction_date = datetime.strptime(date_input, '%Y-%m-%d').date()
+            try:
+                transaction_date = datetime.strptime(date_input, '%Y-%m-%d').date()
+            except ValueError as e:
+                print(f"Error: Invalid date format. Use YYYY-MM-DD. Details: {e}")
+                #return False
         elif isinstance(date_input, date):
             transaction_date = date_input
         else:
-            return False
+            print("Error: Date must be a string (YYYY-MM-DD) or date object")
+            #return False
 
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -25,15 +40,21 @@ def save_transaction(user_id, amount, category, date_input, description=''):
         """, (user_id, amount, category.strip(), transaction_date, description.strip()))
         conn.commit()
         conn.close()
+        print("Transaction saved successfully")
         return True
-    except:
+    except Exception as e:
+        print(f"Error saving transaction:{e}")
         return False
     
-result = save_transaction(1, -20.0, "Food", "2023-01-03", "Lunch")
-print(result)
+# result = save_transaction(1, 2000, "Fare", "2025-04-18", "Transport")
+# print(result)
 
 def get_all_transactions(user_id, month=None, year=None):
     try:
+        if user_id <= 0:
+            print("Error: User ID must be positive")
+            return []
+
         conn = get_db_connection()
         cursor = conn.cursor()
 
@@ -43,7 +64,10 @@ def get_all_transactions(user_id, month=None, year=None):
         """
         params = [user_id]
 
-        if month and year:
+        if month is not None and year is not None:
+            if not (1 <= month <= 12):
+                print("Error: Month must be between 1 and 12")
+                return []
             query += " AND strftime('%m', date) = ? AND strftime('%Y', date) = ?"
             params.extend([f"{month:02d}", str(year)])
         elif year:
@@ -55,11 +79,19 @@ def get_all_transactions(user_id, month=None, year=None):
         transactions = [dict(row) for row in cursor.fetchall()]
         conn.close()
         return transactions
-    except:
+    except Exception as e:
+        print(f"Database error: {e}")
         return []
+# transactions = get_all_transactions(-1)
+# transactions = get_all_transactions(1, 0,0)
+# print(transactions)
+
 
 def calculate_balance(user_id):
     try:
+        if user_id <= 0:
+            print("Error: User ID must be positive")
+            return 0.0
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute("""
