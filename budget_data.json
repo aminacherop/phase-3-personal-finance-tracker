@@ -1,0 +1,13 @@
+{
+  "transactions": [
+    {
+      "date": "2025-05-28",
+      "amount": 2000.0,
+      "category": "Food",
+      "note": "foodie"
+    }
+  ],
+  "budgets": {
+    "Food": 2000.0
+  }
+}
