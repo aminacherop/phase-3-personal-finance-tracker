@@ -22,7 +22,7 @@ class TestBudgetCLI(unittest.TestCase):
         """Test adding a new transaction"""
         tracker = BudgetTracker()
         tracker.DATA_FILE = self.test_file
-        tracker.transactions = []  # Ensure empty before test
+        tracker.transactions = []  
 
         with patch('builtins.input', side_effect=['100', 'Salary', '']):
             tracker.add_transaction()
@@ -33,7 +33,7 @@ class TestBudgetCLI(unittest.TestCase):
     def test_view_transactions_empty(self):
         """Test viewing empty transactions"""
         tracker = BudgetTracker()
-        tracker.transactions = []  # Ensure empty
+        tracker.transactions = []  
         with patch('sys.stdout', new=StringIO()) as fake_out:
             tracker.view_transactions()
             self.assertIn("No transactions", fake_out.getvalue())
@@ -51,7 +51,7 @@ class TestBudgetCLI(unittest.TestCase):
             self.assertIn("❌", output)
 
     def test_data_persistence(self):
-        """Test data saving and loading"""
+        
         tracker = BudgetTracker()
         tracker.DATA_FILE = self.test_file
         tracker.transactions = [{"amount": 50.0, "category": "Test", "date": "2023-01-01", "note": ""}]
@@ -64,7 +64,7 @@ class TestBudgetCLI(unittest.TestCase):
         self.assertEqual(len(new_tracker.transactions), 1)
         self.assertEqual(new_tracker.budgets["Test"], 100)
 
-    @patch('builtins.input', side_effect=['3', '1'])  # Manage budgets -> View
+    @patch('builtins.input', side_effect=['3', '1']) 
     def test_manage_budgets_view(self, mock_input):
         """Test budget management menu"""
         tracker = BudgetTracker()

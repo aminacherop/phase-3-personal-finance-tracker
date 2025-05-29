@@ -5,32 +5,27 @@ def save_transaction(user_id, amount, category, date_input, description=''):
     try:
         if user_id <= 0:
             print("Error:Invalid user id")
-            #return False
+            return False
         if amount == 0:
             print("Error: Amount cannot be zero")
-            #return False
+            return False
         if not category.strip():
             print("Error: Category cannot be empty")
-            #return False
+            return False
 
-        # if isinstance(date_input, str):
-        #     transaction_date = datetime.strptime(date_input, '%Y-%m-%d').date()
-        # elif isinstance(date_input, date):
-        #     transaction_date = date_input
-        # else:
-        #     return False
+       
 
         if isinstance(date_input, str):
             try:
                 transaction_date = datetime.strptime(date_input, '%Y-%m-%d').date()
             except ValueError as e:
                 print(f"Error: Invalid date format. Use YYYY-MM-DD. Details: {e}")
-                #return False
+                return False
         elif isinstance(date_input, date):
             transaction_date = date_input
         else:
             print("Error: Date must be a string (YYYY-MM-DD) or date object")
-            #return False
+            return False
 
         conn = get_db_connection()
         cursor = conn.cursor()

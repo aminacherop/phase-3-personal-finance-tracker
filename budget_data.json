@@ -5,6 +5,12 @@
       "amount": 2000.0,
       "category": "Food",
       "note": "foodie"
+    },
+    {
+      "date": "2025-05-30",
+      "amount": 2000.0,
+      "category": "Food",
+      "note": ""
     }
   ],
   "budgets": {

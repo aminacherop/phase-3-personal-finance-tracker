@@ -1,20 +1,7 @@
 from colorama import Fore, Style
 
 def get_currency_input(prompt: str) -> float:
-    """Get and validate currency input from user.
     
-    Args:
-        prompt: Message to display when asking for input
-        
-    Returns:
-        Validated float number
-        
-    Example:
-        >>> amount = get_currency_input("Enter amount: $")
-        Enter amount: $50.25
-        >>> print(amount)
-        50.25
-    """
     while True:
         try:
             value = input(Fore.YELLOW + prompt + Style.RESET_ALL).strip()
@@ -30,17 +17,7 @@ def get_currency_input(prompt: str) -> float:
             print(f"{Fore.RED}Invalid amount. Please enter like 50 or -20.50{Style.RESET_ALL}")
 
 def print_table(headers: list, rows: list) -> None:
-    """Print formatted table with headers and rows.
-    
-    Args:
-        headers: List of column headers
-        rows: List of lists containing row data
-        
-    Example:
-        >>> headers = ["Name", "Age"]
-        >>> rows = [["Alice", 30], ["Bob", 25]]
-        >>> print_table(headers, rows)
-    """
+   
     if not rows or not headers:
         print(f"{Fore.RED}No data to display{Style.RESET_ALL}")
         return
