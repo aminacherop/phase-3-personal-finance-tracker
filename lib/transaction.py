@@ -1,36 +1,33 @@
 from datetime import datetime, date
-from .database import get_db_connection
+from lib.database import get_db_connection
+
+
 
 def save_transaction(user_id, amount, category, date_input, description=''):
     try:
         if user_id <= 0:
             print("Error:Invalid user id")
-            #return False
+            return False
         if amount == 0:
             print("Error: Amount cannot be zero")
-            #return False
+            return False
         if not category.strip():
             print("Error: Category cannot be empty")
-            #return False
-
-        # if isinstance(date_input, str):
-        #     transaction_date = datetime.strptime(date_input, '%Y-%m-%d').date()
-        # elif isinstance(date_input, date):
-        #     transaction_date = date_input
-        # else:
-        #     return False
+            return False
 
         if isinstance(date_input, str):
             try:
-                transaction_date = datetime.strptime(date_input, '%Y-%m-%d').date()
+                transaction_date = datetime.strptime(
+                    date_input, '%Y-%m-%d').date()
             except ValueError as e:
-                print(f"Error: Invalid date format. Use YYYY-MM-DD. Details: {e}")
-                #return False
+                print(
+                    f"Error: Invalid date format. Use YYYY-MM-DD. Details: {e}")
+                return False
         elif isinstance(date_input, date):
             transaction_date = date_input
         else:
             print("Error: Date must be a string (YYYY-MM-DD) or date object")
-            #return False
+            return False
 
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -45,9 +42,28 @@ def save_transaction(user_id, amount, category, date_input, description=''):
     except Exception as e:
         print(f"Error saving transaction:{e}")
         return False
-    
+
 # result = save_transaction(1, 2000, "Fare", "2025-04-18", "Transport")
 # print(result)
+ 
+# def save_transaction_with_budget_alert(user_id, amount, category, date_input, description=''):
+#     if amount < 0:
+#         impact = check_transaction_budget_impact(user_id, category, amount)
+#         if impact == "OVER":
+#             print(f"WARNING: This transaction will exceed your {category} budget!")
+#         elif impact == "WARNING":
+#             print(f"CAUTION: This transaction will put you near your {category} budget limit!")
+#     result = save_transaction(user_id, amount, category, date_input, description)
+#     if result and amount < 0:
+#         current_status = check_current_budget_status(user_id, category)
+#         print(f" {category} budget status: {current_status}")
+    
+#     return result
+# result = save_transaction_with_budget_alert(1, 120, "food", date.today().isoformat() ,"Groceries")
+# print(result)
+    
+
+
 
 def get_all_transactions(user_id, month=None, year=None):
     try:
@@ -104,6 +120,7 @@ def calculate_balance(user_id):
     except:
         return 0.0
 
+
 def get_recent_transactions(user_id, limit=5):
     try:
         conn = get_db_connection()
@@ -118,6 +135,7 @@ def get_recent_transactions(user_id, limit=5):
         return transactions
     except:
         return []
+
 
 def get_spending_by_category(user_id, category, month=None, year=None):
     try:
@@ -144,6 +162,7 @@ def get_spending_by_category(user_id, category, month=None, year=None):
     except:
         return 0.0
 
+
 def get_transaction_categories(user_id):
     try:
         conn = get_db_connection()
@@ -157,3 +176,38 @@ def get_transaction_categories(user_id):
         return categories
     except:
         return []
+    
+def delete_transaction(transaction_id, user_id):
+    try:
+        if transaction_id <= 0 or user_id <= 0:
+            print("Error: Invalid transaction ID or user ID")
+            return False
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Check if transaction exists and belongs to the user
+        cursor.execute("""
+            SELECT * FROM transactions WHERE transaction_id = ? AND user_id = ?
+        """, (transaction_id, user_id))
+        transaction = cursor.fetchone()
+        if not transaction:
+            print("Error: Transaction not found or does not belong to user.")
+            conn.close()
+            return False
+
+        # Proceed to delete
+        cursor.execute("""
+            DELETE FROM transactions WHERE transaction_id = ? AND user_id = ?
+        """, (transaction_id, user_id))
+        conn.commit()
+        conn.close()
+
+        print("Transaction deleted successfully.")
+        return True
+    except Exception as e:
+        print(f"Error deleting transaction: {e}")
+        return False
+    
+# delete = delete_transaction(44, 1)  # Deletes transaction with ID 7 for user ID 1
+# print(delete)

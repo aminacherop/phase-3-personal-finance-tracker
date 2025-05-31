@@ -22,7 +22,7 @@ class TestTransactions(unittest.TestCase):
                 (1, -30.0, 'Transport', '2023-01-02', 'Bus fare'),
                 (1, 1000.0, 'Income', '2023-01-01', 'Salary')
             """)
-            conn.commit()
+           # conn.commit()
 
     def test_save_transaction(self):
         # Test saving new transaction

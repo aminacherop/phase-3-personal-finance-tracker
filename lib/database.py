@@ -16,6 +16,7 @@ def setup_database():
             description TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             
+            FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
             CHECK (amount != 0),
             CHECK (user_id > 0),
             CHECK (category != '')
@@ -75,6 +76,8 @@ def setup_database():
         (1, 'Shopping', 250.00),
         (1, 'Utilities', 150.00)
     ]
+
+    
     
     for user_id, category, limit_amount in default_budgets:
         cursor.execute("""
@@ -101,4 +104,4 @@ def reset_database():
 if __name__ == "__main__":
     setup_database()
 
-print("Database setup complete with users, transactions, and budgets tables!")
+# print("Database setup complete with users, transactions, and budgets tables!")
