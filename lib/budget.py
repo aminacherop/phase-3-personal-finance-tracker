@@ -1,9 +1,11 @@
 from lib.database import get_db_connection
-from lib.transaction import get_spending_by_category,get_transaction_categories
+from lib.transaction import get_spending_by_category
 from datetime import datetime
+from lib.helper import get_spending_by_category, get_transaction_categories
+
 
 def validate_amount(amount):
-    return isinstance(amount,(int,float)) and amount > 0
+    return isinstance(amount, (int, float)) and amount > 0
 
 
 def set_budget_limit(user_id, category, amount):
@@ -20,7 +22,8 @@ def set_budget_limit(user_id, category, amount):
             SELECT * FROM budgets WHERE user_id = ? AND category = ?
         """, (user_id, category))
         if cursor.fetchone():
-            print("Budget for this category already exists. Use update_budget_limit instead.")
+            print(
+                "Budget for this category already exists. Use update_budget_limit instead.")
             conn.close()
             return False
 
@@ -35,12 +38,10 @@ def set_budget_limit(user_id, category, amount):
     except Exception as e:
         print(f"Error setting budget: {e}")
         return False
-    
-budget= set_budget_limit(1, "Fare",3000)
-print(budget)
 
 
-
+# budget = set_budget_limit(1, "food", 200)
+# print(budget)
 
 
 def update_budget_limit(user_id, category, new_amount):
@@ -67,7 +68,8 @@ def update_budget_limit(user_id, category, new_amount):
         return False
 # update = update_budget_limit(1,"Fare",2000)
 # print(update)
-    
+
+
 def check_budget(user_id, category, spent):
     try:
         conn = get_db_connection()
@@ -129,13 +131,13 @@ def get_budget_summary(user_id):
     except Exception as e:
         print(f"Error generating budget summary: {e}")
         return []
-    
-
-# summary = get_budget_summary(1)
+# if __name__ == "__main__":
+#     user_id = 1
+# summary = get_budget_summary(user_id)
+# print("Budget Summary:")
 # for item in summary:
-#   print(item)
-# print(summary)
-
-
-
-
+#         print(f"- Category: {item['category']}")
+#         print(f"  Limit: {item['limit']}")
+#         print(f"  Spent: {item['spent']}")
+#         print(f"  Status: {item['status']}")
+#         print()

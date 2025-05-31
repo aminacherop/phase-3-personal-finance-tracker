@@ -3,6 +3,7 @@ import os
 from datetime import date
 from lib.transaction import *
 from lib.database import setup_database, get_db_connection
+from lib.helper import get_transaction_categories
 
 class TestTransactions(unittest.TestCase):
     @classmethod

@@ -1,6 +1,6 @@
 from datetime import datetime, date
 from lib.database import get_db_connection
-
+from lib.helper import check_transaction_budget_impact, check_current_budget_status, get_budget_limit, get_spending_by_category
 
 
 def save_transaction(user_id, amount, category, date_input, description=''):
@@ -45,24 +45,42 @@ def save_transaction(user_id, amount, category, date_input, description=''):
 
 # result = save_transaction(1, 2000, "Fare", "2025-04-18", "Transport")
 # print(result)
- 
-# def save_transaction_with_budget_alert(user_id, amount, category, date_input, description=''):
-#     if amount < 0:
-#         impact = check_transaction_budget_impact(user_id, category, amount)
-#         if impact == "OVER":
-#             print(f"WARNING: This transaction will exceed your {category} budget!")
-#         elif impact == "WARNING":
-#             print(f"CAUTION: This transaction will put you near your {category} budget limit!")
-#     result = save_transaction(user_id, amount, category, date_input, description)
-#     if result and amount < 0:
-#         current_status = check_current_budget_status(user_id, category)
-#         print(f" {category} budget status: {current_status}")
-    
-#     return result
-# result = save_transaction_with_budget_alert(1, 120, "food", date.today().isoformat() ,"Groceries")
-# print(result)
-    
 
+
+def save_transaction_with_budget_alert(user_id, amount, category, date_input, description=''):
+    if amount < 0:
+        print("Checking budget impact...")
+        impact = check_transaction_budget_impact(user_id, category, amount)
+        print(f"Impact: {impact}")
+        if impact == "OVER":
+            print(
+                f"WARNING: This transaction will exceed your {category} budget!")
+        elif impact == "WARNING":
+            print(
+                f"CAUTION: This transaction will put you near your {category} budget limit!")
+    result = save_transaction(
+        user_id, amount, category, date_input, description)
+    if result and amount < 0:
+        print("Checking current budget status...")
+        current_status = check_current_budget_status(user_id, category)
+        print(f" {category} budget status: {current_status}")
+
+    return result
+
+
+# print(f"Food budget limit: {get_budget_limit(1, 'Food')}")
+# print(f"Current Food spending: {get_spending_by_category(1, 'Food')}")
+
+# print(check_transaction_budget_impact(1, 'Food', -280))
+# print(check_transaction_budget_impact(1, 'Food', -350))
+
+# result = save_transaction_with_budget_alert(
+#     1, -280, "Food", date.today().isoformat(), "Groceries")
+# print(result)
+
+
+# result = save_transaction_with_budget_alert(1, 2000, "food", date.today().isoformat() ,"Groceries")
+# print(result)
 
 
 def get_all_transactions(user_id, month=None, year=None):
@@ -137,46 +155,6 @@ def get_recent_transactions(user_id, limit=5):
         return []
 
 
-def get_spending_by_category(user_id, category, month=None, year=None):
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        query = """
-            SELECT COALESCE(SUM(ABS(amount)), 0) as total_spent
-            FROM transactions WHERE user_id = ? AND category = ? AND amount < 0
-        """
-        params = [user_id, category]
-
-        if month and year:
-            query += " AND strftime('%m', date) = ? AND strftime('%Y', date) = ?"
-            params.extend([f"{month:02d}", str(year)])
-        elif year:
-            query += " AND strftime('%Y', date) = ?"
-            params.append(str(year))
-
-        cursor.execute(query, params)
-        total = float(cursor.fetchone()['total_spent'])
-        conn.close()
-        return total
-    except:
-        return 0.0
-
-
-def get_transaction_categories(user_id):
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("""
-            SELECT DISTINCT category FROM transactions 
-            WHERE user_id = ? ORDER BY category
-        """, (user_id,))
-        categories = [row['category'] for row in cursor.fetchall()]
-        conn.close()
-        return categories
-    except:
-        return []
-    
 def delete_transaction(transaction_id, user_id):
     try:
         if transaction_id <= 0 or user_id <= 0:
@@ -208,6 +186,7 @@ def delete_transaction(transaction_id, user_id):
     except Exception as e:
         print(f"Error deleting transaction: {e}")
         return False
-    
-# delete = delete_transaction(44, 1)  # Deletes transaction with ID 7 for user ID 1
-# print(delete)
+
+
+delete = delete_transaction(90, 1)
+print(delete)
