@@ -1,78 +1,171 @@
-import sqlite3
+from lib.database import get_db_connection
+from lib.transaction import get_spending_by_category,get_transaction_categories
+from datetime import datetime
 
-class BudgetDB:
-    DEFAULT_CATEGORIES = {"Food": 300, "Transport": 150}
+def validate_amount(amount):
+    return isinstance(amount,(int,float)) and amount > 0
 
-    def __init__(self, db_name="budget.db"):
-        self.conn = sqlite3.connect(db_name)
-        self._create_tables()
-        self._init_defaults()
 
-    def _create_tables(self):
-        with self.conn:
-            self.conn.execute("""
-                CREATE TABLE IF NOT EXISTS users (
-                    user_id INTEGER PRIMARY KEY
-                )
-            """)
-            self.conn.execute("""
-                CREATE TABLE IF NOT EXISTS budgets (
-                    user_id INTEGER,
-                    category TEXT,
-                    limit_amount REAL NOT NULL,
-                    PRIMARY KEY (user_id, category),
-                    FOREIGN KEY (user_id) REFERENCES users(user_id),
-                    CHECK (limit_amount > 0)
-                )
-            """)
+def set_budget_limit(user_id, category, amount, conn=None):
+    if not validate_amount(amount):
+        print("Error: Amount must be a positive number.")
+        return False
 
-    def _init_defaults(self):
-        with self.conn:
-            self.conn.execute("INSERT OR IGNORE INTO users (user_id) VALUES (1)")
-            for category, amount in self.DEFAULT_CATEGORIES.items():
-                self.conn.execute("""
-                    INSERT OR IGNORE INTO budgets (user_id, category, limit_amount)
-                    VALUES (1, ?, ?)
-                """, (category, amount))
+    try:
+        if conn is None:
+            conn = get_db_connection()
+            should_close = True
+        else:
+            should_close = False
+            
+        cursor = conn.cursor()
 
-    def set_budget_limit(self, user_id, category, amount):
-        if amount <= 0:
-            raise ValueError("Amount must be positive")
-        with self.conn:
-            self.conn.execute("""
-                INSERT OR REPLACE INTO budgets (user_id, category, limit_amount)
-                VALUES (?, ?, ?)
-            """, (user_id, category, amount))
+        # Check if budget already exists
+        cursor.execute("""
+            SELECT * FROM budgets WHERE user_id = ? AND category = ?
+        """, (user_id, category))
+        if cursor.fetchone():
+            print("Budget for this category already exists. Use update_budget_limit instead.")
+            if should_close:
+                conn.close()
+            return False
 
-    def update_budget_limit(self, user_id, category, new_amount):
-        self.set_budget_limit(user_id, category, new_amount)
+        cursor.execute("""
+            INSERT INTO budgets (user_id, category, limit_amount)
+            VALUES (?, ?, ?)
+        """, (user_id, category.strip(), amount))
+        conn.commit()
+        if should_close:
+            conn.close()
+        print(f"Budget set: {category} - ${amount}")
+        return True
+    except Exception as e:
+        print(f"Error setting budget: {e}")
+        return False
+    
+budget= set_budget_limit(1, "Fare",3000)
+print(budget)
 
-    def get_budget(self, user_id, category):
-        cursor = self.conn.cursor()
+
+
+
+
+def update_budget_limit(user_id, category, new_amount, conn=None):
+    if not validate_amount(new_amount):
+        print("Error: New amount must be a positive number.")
+        return False
+
+    try:
+        if conn is None:
+            conn = get_db_connection()
+            should_close = True
+        else:
+            should_close = False
+            
+        cursor = conn.cursor()
+
+        # First check if the budget exists
+        cursor.execute("""
+            SELECT * FROM budgets WHERE user_id = ? AND category = ?
+        """, (user_id, category))
+        
+        if cursor.fetchone() is None:
+            print("Budget not found. Use set_budget_limit to create one.")
+            return False
+            
+        cursor.execute("""
+            UPDATE budgets SET limit_amount = ? WHERE user_id = ? AND category = ?
+        """, (new_amount, user_id, category))
+        
+        conn.commit()
+        print(f"Budget updated: {category} - ${new_amount}")
+        
+        if should_close:
+            conn.close()
+        return True
+        
+    except Exception as e:
+        print(f"Error updating budget: {e}")
+        return False
+# update = update_budget_limit(1,"Fare",2000)
+# print(update)
+    
+def check_budget(user_id, category, spent, conn=None):
+    try:
+        if conn is None:
+            conn = get_db_connection()
+            should_close = True
+        else:
+            should_close = False
+            
+        cursor = conn.cursor()
         cursor.execute("""
             SELECT limit_amount FROM budgets 
             WHERE user_id = ? AND category = ?
         """, (user_id, category))
-        result = cursor.fetchone()
-        return result[0] if result else None
+        row = cursor.fetchone()
+        if should_close:
+            conn.close()
 
-    def check_budget(self, user_id, category, spent_amount):
-        budget = self.get_budget(user_id, category)
-        if budget is None:
-            return "NO_BUDGET"
-        if spent_amount > budget:
+        if not row:
+            return "No Budget"
+
+        limit = float(row["limit_amount"])
+
+        if spent >= limit:
             return "OVER"
-        if spent_amount >= 0.9 * budget:
+        elif spent >= 0.9 * limit:
             return "WARNING"
-        return "OK"
+        else:
+            return "OK"
+    except:
+        return "Unknown"
 
-    def get_budget_summary(self, user_id):
-        cursor = self.conn.cursor()
-        cursor.execute("""
-            SELECT category, limit_amount FROM budgets 
-            WHERE user_id = ?
-        """, (user_id,))
-        return {row[0]: {"limit": row[1], "spent": 0} for row in cursor.fetchall()}
+# checkbuget = check_budget(1, "Fare", 2800)  # → OK, WARNING, or OVER
+# print(checkbuget)
 
-    def close(self):
-        self.conn.close()
+
+def get_budget_summary(user_id, conn=None):
+    try:
+        categories = get_transaction_categories(user_id)
+        summary = []
+
+        if conn is None:
+            conn = get_db_connection()
+            should_close = True
+        else:
+            should_close = False
+            
+        cursor = conn.cursor()
+
+        for category in categories:
+            # Get budget limit
+            cursor.execute("""
+                SELECT limit_amount FROM budgets WHERE user_id = ? AND category = ?
+            """, (user_id, category))
+            row = cursor.fetchone()
+            limit = float(row["limit_amount"]) if row else None
+
+            # Get total spent from transactions
+            spent = get_spending_by_category(user_id, category)
+
+            summary.append({
+                "category": category,
+                "limit": limit,
+                "spent": spent,
+                "status": check_budget(user_id, category, spent, conn) if limit else "No Budget"
+            })
+
+        if should_close:
+            conn.close()
+        return summary
+
+    except Exception as e:
+        print(f"Error generating budget summary: {e}")
+        return []
+    
+
+# summary = get_budget_summary(1)
+# for item in summary:
+#   print(item)
+# print(summary)
