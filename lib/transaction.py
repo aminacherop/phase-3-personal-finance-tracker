@@ -1,6 +1,6 @@
 from datetime import datetime, date
-from lib.database import get_db_connection
-from lib.helper import check_transaction_budget_impact, check_current_budget_status, get_budget_limit, get_spending_by_category
+from database import get_db_connection
+from helper import check_transaction_budget_impact, check_current_budget_status, get_budget_limit, get_spending_by_category
 
 
 def save_transaction(user_id, amount, category, date_input, description=''):
@@ -187,6 +187,3 @@ def delete_transaction(transaction_id, user_id):
         print(f"Error deleting transaction: {e}")
         return False
 
-
-delete = delete_transaction(90, 1)
-print(delete)

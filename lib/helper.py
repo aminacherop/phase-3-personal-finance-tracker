@@ -1,4 +1,4 @@
-from lib.database import get_db_connection
+from database import get_db_connection
 from datetime import date
 import logging
 

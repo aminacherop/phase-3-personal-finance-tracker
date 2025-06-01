@@ -1,7 +1,7 @@
-from lib.database import get_db_connection
-from lib.transaction import get_spending_by_category
+from database import get_db_connection
+from transaction import get_spending_by_category
 from datetime import datetime
-from lib.helper import get_spending_by_category, get_transaction_categories
+from helper import get_spending_by_category, get_transaction_categories
 
 
 def validate_amount(amount):
