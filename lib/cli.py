@@ -1,30 +1,15 @@
 #!/usr/bin/env python3
-
-
 import os
 import sys
 from datetime import datetime, date
 from colorama import Fore, Style, Back
 import colorama
-
-# Import our modules
 from database import setup_database, get_db_connection
-from transaction import (
-    save_transaction_with_budget_alert,
-    get_all_transactions,
-    calculate_balance,
-    get_recent_transactions,
-    delete_transaction
-)
-from budget import (
-    set_budget_limit,
-    update_budget_limit,
-    get_budget_summary,
-    check_budget
-)
+from transaction import (save_transaction_with_budget_alert, get_all_transactions,
+                         calculate_balance, get_recent_transactions, delete_transaction)
+from budget import (set_budget_limit, update_budget_limit,
+                    get_budget_summary, check_budget)
 from helper import get_spending_by_category, get_transaction_categories
-
-# Initialize colorama for cross-platform color support
 colorama.init()
 
 
@@ -218,11 +203,10 @@ class FinanceTrackerCLI:
             print(f"{Fore.RED}Error fetching users: {e}{Style.RESET_ALL}")
             return [{'user_id': 1, 'name': 'Default User'}]
 
-    def create_new_user(self):
-        """Create a new user"""
+    def create_new_user(self):  # Create a new user
         name = self.get_user_input("Enter your name: ")
         if not name or not name.strip():
-            print(f"{Fore.RED}✗ Invalid name. Using Default User.{Style.RESET_ALL}")
+            print(f"{Fore.RED}Invalid name. Using Default User.{Style.RESET_ALL}")
             self.user_id = 1
             self.user_name = "Default User"
             return
@@ -265,8 +249,7 @@ class FinanceTrackerCLI:
         elif choice == 3:
             self.view_all_users()
 
-    def switch_user(self):
-        # Switch to different user
+    def switch_user(self):  # Switch to different user
         users = self.get_all_users()
 
         print(f"\n{Fore.CYAN}Available users:{Style.RESET_ALL}")
@@ -294,8 +277,7 @@ class FinanceTrackerCLI:
 
         input(f"\n{Fore.CYAN}Press Enter to continue...{Style.RESET_ALL}")
 
-    def view_all_users(self):
-        """Display all users"""
+    def view_all_users(self):  # Display all users
         users = self.get_all_users()
 
         print(f"\n{Fore.CYAN}👥 ALL USERS{Style.RESET_ALL}")
@@ -311,8 +293,7 @@ class FinanceTrackerCLI:
 
         input(f"\n{Fore.CYAN}Press Enter to continue...{Style.RESET_ALL}")
 
-    def view_transactions(self):
-        """View transactions with filtering options"""
+    def view_transactions(self):  # View transactions with filtering options
         print(f"\n{Fore.GREEN}📊 VIEW TRANSACTIONS{Style.RESET_ALL}")
         print("─" * 20)
 
@@ -353,7 +334,7 @@ class FinanceTrackerCLI:
     def display_transactions(self, transactions):
         """Display formatted transaction list"""
         if not transactions:
-            print(f"\n{Fore.YELLOW}📭 No transactions found.{Style.RESET_ALL}")
+            print(f"\n{Fore.YELLOW} No transactions found.{Style.RESET_ALL}")
             return
 
         print(f"\n{Fore.CYAN}📋 TRANSACTION HISTORY{Style.RESET_ALL}")
@@ -479,8 +460,7 @@ class FinanceTrackerCLI:
 
         input(f"\n{Fore.CYAN}Press Enter to continue...{Style.RESET_ALL}")
 
-    def view_budget_summary(self):
-        """Display comprehensive budget summary"""
+    def view_budget_summary(self):  # Display budget summary
         summary = get_budget_summary(self.user_id)
 
         print(f"\n{Fore.GREEN}📈 BUDGET SUMMARY{Style.RESET_ALL}")
@@ -532,8 +512,7 @@ class FinanceTrackerCLI:
 
         input(f"\n{Fore.CYAN}Press Enter to continue...{Style.RESET_ALL}")
 
-    def view_recent_activity(self):
-        """Show recent transactions"""
+    def view_recent_activity(self):  # Show recent transactions
         print(f"\n{Fore.GREEN}🕒 RECENT ACTIVITY{Style.RESET_ALL}")
         print("─" * 20)
 
@@ -552,8 +531,7 @@ class FinanceTrackerCLI:
 
         input(f"\n{Fore.CYAN}Press Enter to continue...{Style.RESET_ALL}")
 
-    def delete_transaction(self):
-        """Delete a transaction"""
+    def delete_transaction(self):  # Delete a transaction
         print(f"\n{Fore.RED}🗑️  DELETE TRANSACTION{Style.RESET_ALL}")
         print("─" * 25)
 
@@ -606,8 +584,7 @@ class FinanceTrackerCLI:
 
         input(f"\n{Fore.CYAN}Press Enter to continue...{Style.RESET_ALL}")
 
-    def run(self):
-        """Main application loop with updated menu order"""
+    def run(self):  # Main application loop with updated menu order
         while True:
             self.clear_screen()
             self.print_header()
@@ -618,7 +595,7 @@ class FinanceTrackerCLI:
 
             if choice is None or choice == 10:
                 print(
-                    f"\n{Fore.GREEN}Thank you for using Personal Finance Tracker! 👋{Style.RESET_ALL}")
+                    f"\n{Fore.GREEN}Thank you for using Personal Finance Tracker!{Style.RESET_ALL}")
                 break
 
             try:
@@ -650,8 +627,7 @@ class FinanceTrackerCLI:
                 input(f"{Fore.CYAN}Press Enter to continue...{Style.RESET_ALL}")
 
 
-def main():
-    """Entry point for the application"""
+def main():  # Entry point for the application
     try:
         app = FinanceTrackerCLI()
         app.run()

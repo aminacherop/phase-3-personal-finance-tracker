@@ -68,7 +68,7 @@ def get_transaction_categories(user_id):
 
 
 def check_transaction_budget_impact(user_id, category, amount):
-    #Checks the impact of a new transaction on the user's budget.Returns one of: "OVER", "WARNING", "OK", "NO BUDGET"
+    #Checks the impact of a new transaction on the user's budget.
     
     try:
         limit = get_budget_limit(user_id, category)

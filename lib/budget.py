@@ -131,13 +131,4 @@ def get_budget_summary(user_id):
     except Exception as e:
         print(f"Error generating budget summary: {e}")
         return []
-# if __name__ == "__main__":
-#     user_id = 1
-# summary = get_budget_summary(user_id)
-# print("Budget Summary:")
-# for item in summary:
-#         print(f"- Category: {item['category']}")
-#         print(f"  Limit: {item['limit']}")
-#         print(f"  Spent: {item['spent']}")
-#         print(f"  Status: {item['status']}")
-#         print()
+

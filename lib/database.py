@@ -58,11 +58,11 @@ def setup_database():
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_user_date ON transactions(user_id, date)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_user_category ON transactions(user_id, category)")
     
-    # Create indexes for budgets table
+    # Creates indexes for budgets table
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_budget_user ON budgets(user_id)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_budget_category ON budgets(user_id, category)")
 
-    # Insert default user (user_id=1) if not exists
+    #default user (user_id=1) if not exists
     cursor.execute("""
         INSERT OR IGNORE INTO users (user_id, name) 
         VALUES (1, 'Default User')
