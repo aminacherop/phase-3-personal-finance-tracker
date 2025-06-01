@@ -1,16 +1,16 @@
-# 💰 Personal Finance Tracker
+# Personal Finance Tracker
 
 A simple CLI-based personal finance tracker built with Python and SQLite. Easily add users, log transactions, and track expenses with automatic budget alerts.
 
 ---
 
-## 📌 Project Statement
+## Project Statement
 
 The Personal Finance Tracker is designed to help users manage and track their income and expenses using a command-line interface. It supports adding users and transactions, categorizing expenses, and notifying users when a transaction exceeds a set budget threshold.
 
 ---
 
-## 🛠️ Technologies Used
+## Technologies Used
 
 - **Python 3.x**
 - **SQLite** (via Python’s `sqlite3` module)
@@ -18,15 +18,15 @@ The Personal Finance Tracker is designed to help users manage and track their in
 
 ---
 
-## 🧪 MVP Features & Demo
+## MVP Features & Demo
 
-### ✅ MVP Features
+### MVP Features
 - Add users to the database.
 - Add transactions (with user ID, amount, category, date, description).
 - Store all data in an SQLite database.
 - Simple budget alert if spending exceeds a threshold.
 
-### 🎥 Demo
+### Demo
 
 ```
 # Add a user
@@ -38,7 +38,7 @@ python -m lib.cli add-transaction 1 500 Groceries 2025-06-01 "Weekly shopping"
 # If a transaction exceeds 1000, an alert will show
 python -m lib.cli add-transaction 1 1200 Rent 2025-06-01 "Monthly rent"
 ```
-## 🚀 Getting Started
+## Getting Started
 1. Clone the Repository
 ```
 git clone https://github.com/aminacherop/phase-3-personal-finance-tracker
@@ -65,7 +65,7 @@ python -m lib.cli add-user Alice
 # Add a transaction
 python -m lib.cli add-transaction 1 1200 Rent 2025-06-01 "Monthly rent"
 ```
-## 🧭 Command Reference
+## Command Reference
 ```
 # Add a new user
 python -m lib.cli add-user <name>
@@ -79,20 +79,38 @@ Example:
 python -m lib.cli add-user Bob
 python -m lib.cli add-transaction 1 450 Food 2025-06-01 "Lunch at cafe"
 ```
-## 📁 Project Structure
+## Project Structure
 ```
 personal-finance-tracker/
-├── db/
-│   └── finance.db             # SQLite database file
+├── .pytest_cache/
+├── .venv/
+│  
+├── .database/   
+│  └── finance_tracker.db
 ├── lib/
+│   ├── __pycache__/
 │   ├── __init__.py
-│   ├── cli.py                 # Command-line interface logic
-│   ├── database.py            # Setup script for database/tables
-│   └── models.py              # Models and helpers
-├── README.md
-└── .gitignore
+│   ├── __budget.py
+│   ├── __cli.py
+│   ├── __database.py
+│   ├── __debug.py
+│   ├── __debug_script.py
+│   ├── __helper.py
+│   ├── transaction.py
+│    
+├── tests/
+│     ├── __pycache__/
+│     ├── __init__.py
+│     ├── test_budget.py
+│     ├── test_transaction.py
+│     
+│── .clear
+├── main.py
+├── Pipefile
+├── Pipefile.lock
+└── README.md
 ```
-## 🔮 Future Plans
+## Future Plans
 - Budget limits per user or category
 
 - View transaction history with filters (by date, category, user)
@@ -123,6 +141,6 @@ git push origin feature/my-feature
 
 # Open a Pull Request
 ```
-## 📃 License
+## License
 
 This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for more information.
